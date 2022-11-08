@@ -19,25 +19,22 @@ try {
 //! database connection
 const db = firebase.firestore();
 const auth = firebase.auth();
-app.get('/', (req, res) => {
+
+// Get Specific User
+app.get('/user', (req, res) => {
 	db.collection('Users')
-		.doc('9PuCW7G1nUQUPfdD62yGnvXL2303')
+		.doc(req.body.uid)
 		.get()
 		.then((user) => {
-			// let temp = [];
-			// user.forEach((documentSnapshot) => {
-			// 	let userDetails = {};
-			// 	userDetails = documentSnapshot.data();
-			// 	userDetails['id'] = documentSnapshot.id;
-			// 	temp.push(userDetails);
-			// });
 			res.json(user.data());
 		})
 		.catch((err) => {
 			res.json(err);
 		});
 });
-app.post('/', (req, res) => {
+
+// Create User
+app.post('/CreateUser', (req, res) => {
 	const UserData = {
 		name: req.body.displayName,
 		address: req.body.address,
@@ -57,4 +54,5 @@ app.post('/', (req, res) => {
 			res.json(err);
 		});
 });
+
 app.listen(port, () => console.log(`Server is listen at ${port}`));
