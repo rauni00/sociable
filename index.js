@@ -21,7 +21,7 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 
 // Get Specific User
-app.get('/user', (req, res) => {
+app.post('/user', (req, res) => {
 	db.collection('Users')
 		.doc(req.body.uid)
 		.get()
@@ -35,14 +35,18 @@ app.get('/user', (req, res) => {
 
 // Create User
 app.post('/CreateUser', (req, res) => {
+	const { displayName, address, email, bio, photoUrl, phoneNumber, likes, comments, uid } =
+		req.body;
 	const UserData = {
-		name: req.body.displayName,
-		address: req.body.address,
-		email: req.body.email,
-		bio: req.body.bio,
-		photoUrl: req.body.photoUrl,
-		phoneNumber: req.body.phoneNumber,
-		uid: req.body.uid,
+		displayName: displayName,
+		address: address,
+		email: email,
+		bio: bio,
+		photoUrl: photoUrl,
+		phoneNumber: phoneNumber,
+		likes: likes,
+		comments: comments,
+		uid: uid,
 	};
 	db.collection('Users')
 		.doc(req.body.uid)
@@ -54,5 +58,46 @@ app.post('/CreateUser', (req, res) => {
 			res.json(err);
 		});
 });
+app.post('/like', (req, res) => {
+	const { postId, userId, like } = req.body;
+	const likeUser = {
+		postId: '9PuCW7G1nUQD62yGnvXL2303',
+		userId: '9PuCW7PfdD62yGnvXL2303',
+		like: false,
+	};
+	// function isLike(likeUser) {
+	// 	if (likeUser.like) {
+	// 		return { likes: firebase.firestore.FieldValue.arrayUnion(likeUser) };
+	// 	} else {
+	// 		return { likes: firebase.firestore.FieldValue.arrayRemove(likeUser) };
+	// 	}
+	// }
+	// res.json(isLike(likeUser).likes);
+	const fValue = firebase.firestore.FieldValue;
+	db.collection('Upload')
+		.doc('9PuCW7G1nUQUPfdD62yGnvXL2303')
+		.update({
+			like: likeUser.like
+				? fValue.arrayUnion(likeUser)
+				: fValue.firestore.FieldValue.arrayRemove(likeUser),
+		})
+		.then(() => {
+			res.status(200).json({ msg: 'success' });
+		})
+		.catch((err) => {
+			res.status(400).json(err);
+		});
+});
 
+app.get('/post', (req, res) => {
+	db.collection('Upload')
+		.doc('9PuCW7G1nUQUPfdD62yGnvXL2303')
+		.get()
+		.then((snap) => {
+			res.json(snap.data());
+		})
+		.catch((err) => {
+			res.status(400).json(err);
+		});
+});
 app.listen(port, () => console.log(`Server is listen at ${port}`));
