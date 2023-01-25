@@ -1,28 +1,26 @@
-import firebase from 'firebase/compat/app'; //v9
-import 'firebase/compat/auth'; //v9
-import 'firebase/compat/firestore'; //v9
-import express from 'express';
+import firebase from "firebase/compat/app"; //v9
+import "firebase/compat/auth"; //v9
+import "firebase/compat/firestore"; //v9
+import express from "express";
 const app = express();
-import config from './serviceAccountKey.json' assert { type: 'json' };
-import bodyParser from 'body-parser';
-// import { getAuth } from 'firebase/compat/auth';
+import config from "./serviceAccountKey.json" assert { type: "json" };
+import bodyParser from "body-parser";
 const port = process.env.PORT || 3000;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 //! firebase connection
 try {
 	firebase.initializeApp(config);
-	console.log('Firebase Database Connected Success');
+	console.log("Firebase Database Connected Success");
 } catch (error) {
-	console.log('===============', error);
+	console.log("===============", error);
 }
 //! database connection
 const db = firebase.firestore();
-const auth = firebase.auth();
 
 // Get Specific User
-app.post('/user', (req, res) => {
-	db.collection('Users')
+app.get("/user", (req, res) => {
+	db.collection("Users")
 		.doc(req.body.uid)
 		.get()
 		.then((user) => {
@@ -34,9 +32,8 @@ app.post('/user', (req, res) => {
 });
 
 // Create User
-app.post('/CreateUser', (req, res) => {
-	const { displayName, address, email, bio, photoUrl, phoneNumber, likes, comments, uid } =
-		req.body;
+app.post("/CreateUser", (req, res) => {
+	const { displayName, address, email, bio, photoUrl, phoneNumber, likes, comments, uid } = req.body;
 	const UserData = {
 		displayName: displayName,
 		address: address,
@@ -48,50 +45,42 @@ app.post('/CreateUser', (req, res) => {
 		comments: comments,
 		uid: uid,
 	};
-	db.collection('Users')
+	db.collection("Users")
 		.doc(req.body.uid)
 		.set(UserData)
 		.then((user) => {
-			res.json({ msg: 'success' });
+			res.json({ msg: "success" });
 		})
 		.catch((err) => {
 			res.json(err);
 		});
 });
-app.post('/like', (req, res) => {
+app.post("/like", (req, res) => {
 	const { postId, userId, like } = req.body;
 	const likeUser = {
-		postId: '9PuCW7G1nUQD62yGnvXL2303',
-		userId: '9PuCW7PfdD62yGnvXL2303',
-		like: false,
+		postId: "orvEuvlALEjBBpVuuWfE",
+		userId: "9PuCnUQUPfdD62yGnvXL2303",
+		like: true,
 	};
-	// function isLike(likeUser) {
-	// 	if (likeUser.like) {
-	// 		return { likes: firebase.firestore.FieldValue.arrayUnion(likeUser) };
-	// 	} else {
-	// 		return { likes: firebase.firestore.FieldValue.arrayRemove(likeUser) };
-	// 	}
-	// }
-	// res.json(isLike(likeUser).likes);
-	const fValue = firebase.firestore.FieldValue;
-	db.collection('Upload')
-		.doc('9PuCW7G1nUQUPfdD62yGnvXL2303')
-		.update({
-			like: likeUser.like
-				? fValue.arrayUnion(likeUser)
-				: fValue.firestore.FieldValue.arrayRemove(likeUser),
-		})
+	let isLike = "";
+	likeUser.like
+		? (isLike = firebase.firestore.FieldValue.arrayUnion(likeUser))
+		: (isLike = firebase.firestore.FieldValue.arrayRemove(likeUser));
+
+	db.collection("Upload")
+		.doc("9PuCW7G1nUQUPfdD62yGnvXL2303")
+		.update({ like: isLike })
 		.then(() => {
-			res.status(200).json({ msg: 'success' });
+			res.status(200).json({ msg: "success" });
 		})
 		.catch((err) => {
 			res.status(400).json(err);
 		});
 });
 
-app.get('/post', (req, res) => {
-	db.collection('Upload')
-		.doc('9PuCW7G1nUQUPfdD62yGnvXL2303')
+app.get("/post", (req, res) => {
+	db.collection("Upload")
+		.doc("9PuCW7G1nUQUPfdD62yGnvXL2303")
 		.get()
 		.then((snap) => {
 			res.json(snap.data());
