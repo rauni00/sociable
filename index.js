@@ -19,6 +19,9 @@ try {
 const db = firebase.firestore();
 
 // Get Specific User
+app.get("/", (req, res) => {
+	res.json("Sociable App");
+});
 app.get("/user", (req, res) => {
 	db.collection("Users")
 		.doc(req.body.uid)
